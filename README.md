@@ -239,7 +239,7 @@ router.post('/comments', function(req, res, next) {
 Notice that we created a Comment object from the req.body and saved it to the mongo database using the mongoose connection to the mongo database.
 Now lets test the routes using curl from your instance. First type cntrl-C to kill your server, then "npm start" to start it up again.
 ```
-curl --data 'title=test' http://localhost:3000/comments
+curl --data 'title=test' http://localhost:3001/comments
 ```
 This should return something like this:
 ```
@@ -248,7 +248,7 @@ $ curl --data 'title=test' http://localhost:3000/comments
 ```
 Now lets test the GET route.
 ```
-curl http://localhost:3000/comments
+curl http://localhost:3001/comments
 ```
 Should return something like this
 ```
@@ -299,7 +299,7 @@ router.put('/comments/:comment/upvote', function(req, res, next) {
 ```
 You should now be able to test your route using curl. First access the route to GET all of the comments. Find the id of one of the comments, and use curl to upvote it.
 ```
-curl -X PUT http://localhost:3000/comments/<COMMENT ID>/upvote
+curl -X PUT http://localhost:3001/comments/<COMMENT ID>/upvote
 ```
 Now use the URL to make sure that the upvote count was incremented.
 Now that our backend is working, we just need to wire it up to our angular frontend. First we will create a getAll() function to retrieve comments from our REST service in public/javascripts/app.js.
