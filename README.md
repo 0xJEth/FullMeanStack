@@ -267,7 +267,7 @@ router.param('comment', function(req, res, next, id) {
   });
 });
 ```
-Now, whenever we create a route with :comment in it, this function will be run first to get the comment out of the database. The router.param allowed us to define this middleware that is passed to the route. We use the query interface for mongoose to simplify the access.
+Now, whenever we create a route with :comment in it, this function will be run first to get the comment out of the database. The router.param allowed us to define this [middleware](http://expressjs.com/en/guide/using-middleware.html) that is passed to the route. We use the query interface for mongoose to simplify the access.
 Lets use this middleware function to create a route for returning a single comment
 
 ```
