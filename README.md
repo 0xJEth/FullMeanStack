@@ -7,8 +7,8 @@ First create an express project
 express comment
 cd comment
 npm install
-npm start
 export PORT=3001
+npm start
 ```
 This will start a web server on port 3001. Take a look at the file in bin/www which is a node.js app that is run with "npm start". Files in the "public" directory will be served by the node server.
 Lets get started with a simple Angular application with the following view "index.html" that we will create inside of the "public" directory.
