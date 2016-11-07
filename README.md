@@ -357,16 +357,16 @@ And then in our controller, we simply replace incrementUpvotes() with this:
 Test to make sure the upvotes are maintained across refreshes.
 
 Now lets implement the last piece of a CRUD (Create, Read, Update, Delete) RESTful service, Delete.  First, add the delete button to your html code
-...
+```
   <div ng-repeat="comment in comments | orderBy: '-upvotes'">
     <span class="glyphicon glyphicon-remove" ng-click="delete(comment)"></span>
     <span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(comment)"></span>
     {{comment.title}} - upvotes: {{comment.upvotes}}
   </div>
-...
+```
 
 And add the delete() function to your controller. Notice that we call getAll() after the delete to refresh the list in our model.  We could have deleted the record from the list if we didnt want to do this.
-...
+```
     $scope.delete = function(comment) {
       $http.delete('/comments/' + comment._id )
         .success(function(data){
@@ -374,13 +374,13 @@ And add the delete() function to your controller. Notice that we call getAll() a
         });
       $scope.getAll();
     };
-...
+```
 
 Now we need to implement the delete verb in our back end.
-...
+```
 router.delete('/comments/:comment', function(req, res) {
   console.log("in Delete");
   req.comment.remove();
   res.json(req.comment);
 });
-...
+```
