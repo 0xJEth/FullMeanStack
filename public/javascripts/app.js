@@ -10,14 +10,13 @@ angular.module('comment', [])
       {title:'Comment 4', upvotes:4},
       {title:'Comment 5', upvotes:3}
     ];
-    $scope.create = function(comment) {
-      return $http.post('/comments', comment).success(function(data){
+    
+    $scope.addComment = function() {
+      var newcomment = {title:$scope.formContent,upvotes:0};
+      $scope.formContent='';
+      $http.post('/comments', comment).success(function(data){
         $scope.comments.push(data);
       });
-    };
-	$scope.addComment = function() {
-	  $scope.create({title:$scope.formContent,upvotes:0});
-      $scope.formContent='';
     };
     $scope.upvote = function(comment) {
       return $http.put('/comments/' + comment._id + '/upvote')
