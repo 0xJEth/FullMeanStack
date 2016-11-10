@@ -2,6 +2,7 @@ angular.module('comment', [])
 .controller('MainCtrl', [
   '$scope','$http',
   function($scope,$http){
+    $scope.comments = [];
     $scope.addComment = function() {
       var newcomment = {title:$scope.formContent,upvotes:0};
       $scope.formContent='';
