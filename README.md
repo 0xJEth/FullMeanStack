@@ -182,7 +182,7 @@ In addition to the above files structure, we are going to add one more folder. C
 mkdir models
 ```
 This folder will contain our Mongoose schema definitions.
-Now we are going to set up the mongo database for the node.js backend. We will use mongoose to set up the schema. Chapter 16 of the book discusses mongoose in detail. Add the following code to the top of your app.js file [right after require('body-parser')] to connect to the mongod. Make sure that mongod is running on your instance.
+Now we are going to set up the mongo database for the node.js backend. We will use mongoose to set up the schema. Add the following code to the top of your app.js file [right after require('body-parser')] to connect to the mongod. Make sure that mongod is running on your instance.
 ```
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/comments');
