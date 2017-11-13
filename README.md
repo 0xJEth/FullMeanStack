@@ -309,6 +309,7 @@ Now that our backend is working, we just need to wire it up to our angular front
       angular.copy(data, $scope.comments);
     });
   };
+  $scope.getAll();
 ```
 You will need to inject the $http service into your controller.
 ```
@@ -317,7 +318,8 @@ angular.module('comment', [])
   '$scope','$http',
   function($scope,$http){
 ```
-Upon success, we will copy the data from the GET REST service into our $scope comments array. The angular.copy function will update the view. Now we just need to find a way to call getAll at the right time.
+Upon success, we will copy the data from the GET REST service into our $scope comments array. The angular.copy function will update the view. Now we just need to find a way to call getAll at the right time.  Lets add it right after we define it.  And delete the initialization of your comments array.
+
 Now that you have implemented one backend interface, the others should be easy. Lets modify the addComment function to write the output to the mongo database.
 First make a 'create' function that will write a comment to the database.
 ```
