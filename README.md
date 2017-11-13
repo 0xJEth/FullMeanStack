@@ -383,6 +383,6 @@ Now we need to implement the delete verb in our back end.
 router.delete('/comments/:comment', function(req, res) {
   console.log("in Delete");
   req.comment.remove();
-  res.json(req.comment);
+  res.sendStatus(200);
 });
 ```
