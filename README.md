@@ -76,11 +76,7 @@ We are going to add one more folder for the mongoose models. Create a new folder
 mkdir models
 ```
 This folder will contain our Mongoose schema definitions.
-Now we are going to set up the mongo database for the node.js backend. We will use mongoose to set up the schema. Add the following code to the top of your app.js file [right after require('body-parser')] to connect to the mongod. Make sure that mongod is running on your instance.
-```
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/commentDB',{useMongoClient:true});
-```
+
 Now create the file "Comments.js" in the models directory with the following content.
 ```
 var mongoose = require('mongoose');
@@ -90,10 +86,19 @@ var CommentSchema = new mongoose.Schema({
 });
 mongoose.model('Comment', CommentSchema);
 ```
-Now add the model to your app.js file right after the mongoose.connect call.
+Now add the model to your app.js file [right before require('./routes/index');] to connect to the mongod. Make sure that mongod is running on your instance using the mongo console application.
 ```
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/fullmeanstack', { useNewUrlParser: true });
 require('./models/Comments');
+var db = mongoose.connection; //Saves the connection as a variable to use
+db.on('error', console.error.bind(console, 'connection error:')); //Checks for connection errors
+db.once('open', function() { //Lets us know when we're connected
+    console.log('Connected');
+});
 ```
+Test the mongoose connection using "npm start"
+
 Now we need to open up REST routes to the database. We want the user to be able to perform the following tasks:
 ```
 view comments
@@ -133,7 +138,7 @@ router.post('/comments', function(req, res, next) {
 Notice that we created a Comment object from the req.body and saved it to the mongo database using the mongoose connection to the mongo database.
 Now lets test the routes using curl from your instance. First type cntrl-C to kill your server, then "npm start" to start it up again.
 ```
-curl --data 'title=test' http://localhost:3001/comments
+curl --data 'title=test' http://localhost:4200/comments
 ```
 This should return something like this:
 ```
@@ -142,7 +147,7 @@ $ curl --data 'title=test' http://localhost:3000/comments
 ```
 Now lets test the GET route.
 ```
-curl http://localhost:3001/comments
+curl http://localhost:4200/comments
 ```
 Should return something like this
 ```
@@ -152,8 +157,7 @@ You can also access the GET route through the URL in your browser. Test it to ma
 Notice that the upvote REST interface requires us to find a particular comment before operating on it. In order to make this easier, we can create a route to preload a comment object in routes/index.js using the express param function.
 ```
 router.param('comment', function(req, res, next, id) {
-  var query = Comment.findById(id);
-  query.exec(function (err, comment){
+  Comment.findById(id, function (err, comment){
     if (err) { return next(err); }
     if (!comment) { return next(new Error("can't find comment")); }
     req.comment = comment;
@@ -173,7 +177,7 @@ Since the :comment part of the route was interpreted by the middleware that put 
 The :comment part of the URL will be the ID given to the comment in mongo. So, you should be able to enter a URL like this to test your setup:
 
 ```
-http://YOURIP/comments/54f4b19425b53f6a052851ce
+http://YOURIP:4200/comments/54f4b19425b53f6a052851ce
 ```
 Now let's implement the route to allow upvoting. We will use our middleware to identify the comment and then open up a route on this comment to upvote it. Add the upvote method to the models/Comments.js schema.
 ```
@@ -193,7 +197,7 @@ router.put('/comments/:comment/upvote', function(req, res, next) {
 ```
 You should now be able to test your route using curl. First access the route to GET all of the comments. Find the id of one of the comments, and use curl to upvote it.
 ```
-curl -X PUT http://localhost:3001/comments/<COMMENT ID>/upvote
+curl -X PUT http://localhost:4200/comments/<COMMENT ID>/upvote
 ```
 Now use the URL to make sure that the upvote count was incremented.
 Now that our backend is working, we just need to wire it up to our angular frontend. First we will create a getAll() function to retrieve comments from our REST service in public/javascripts/app.js.
@@ -215,41 +219,28 @@ angular.module('comment', [])
 Upon success, we will copy the data from the GET REST service into our $scope comments array. The angular.copy function will update the view. Now we just need to find a way to call getAll at the right time.  Lets add it right after we define it.  And delete the initialization of your comments array.
 
 Now that you have implemented one backend interface, the others should be easy. Lets modify the addComment function to write the output to the mongo database.
-First make a 'create' function that will write a comment to the database.
+Once you have created the object, send it to the post route in the backend. Since the backend returns the object with the ID in it, we can use this to upvote the comment.
 ```
-  $scope.create = function(comment) {
-    return $http.post('/comments', comment).success(function(data){
-      $scope.comments.push(data);
-    });
-  };
-```
-When the call to the /comments REST service is successful, the data will be pushed onto the comments array. Now you just need to call this function from your addComment function.
-```
-      if($scope.formContent === '') { return; }
-      console.log("In addComment with "+$scope.formContent);
-      $scope.create({
-        title: $scope.formContent,
-        upvotes: 0,
-      });
-      $scope.formContent = '';
+            $scope.addComment = function() {
+                var newcomment = { title: $scope.formContent, upvotes: 0 };
+                $http.post('/comments', newcomment).success(function(data) {
+                    $scope.comments.push(data);
+                });
+                $scope.formContent = '';
+            };
 ```
 Test this function to make sure you can create new comments and see them displayed. You should be able to refresh the page and still see them.
-Now you need to be able to save the upvoting for your comments. Follow the same process of creating a function to save out the upvote using your PUT REST route, then add it to the upvote function.
+Now you need to be able to save the upvoting for your comments. Follow the same process of calling the put verb on your HTTP route.  You need to pass the ID in the route to the backend.
 ```
-    $scope.upvote = function(comment) {
-      return $http.put('/comments/' + comment._id + '/upvote')
-        .success(function(data){
-          console.log("upvote worked");
-          comment.upvotes += 1;
-        });
-    };
+            $scope.incrementUpvotes = function(comment) {
+                $http.put('/comments/' + comment._id + '/upvote')
+                    .success(function(data) {
+                        console.log("upvote worked");
+                        comment.upvotes += 1;
+                    });
+            };
 ```
-And then in our controller, we simply replace incrementUpvotes() with this:
-```
-    $scope.incrementUpvotes = function(comment) {
-      $scope.upvote(comment);
-    };
-```
+
 Test to make sure the upvotes are maintained across refreshes.
 
 Now lets implement the last piece of a CRUD (Create, Read, Update, Delete) RESTful service, Delete.  First, add the delete button to your html code
