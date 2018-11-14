@@ -1,5 +1,5 @@
 # FullMeanStack
-Hints for creating an Angular application
+Hints for creating a full MEAN stack application 
 
 In this tutorial you will create an Angular application with a node back end and mongoose database interface.
 First create an express project
