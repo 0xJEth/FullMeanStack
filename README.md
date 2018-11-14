@@ -1,183 +1,77 @@
 # FullMeanStack
 Hints for creating an Angular application
 
-In this tutorial you will create an Angular application that will implement comments for a blog. You will allow the users to create comments and then upvote other people's comments. Much of this tutorial is taken from this Flapper News site and you may want to look at it if you get stuck. The following steps will use express to set up your project and then build the front and back end in the project.
+In this tutorial you will create an Angular application with a node back end and mongoose database interface.
 First create an express project
 ```
 express comment
 cd comment
 npm install
-export PORT=3001
+export PORT=4200
 npm start
 ```
-This will start a web server on port 3001. Take a look at the file in bin/www which is a node.js app that is run with "npm start". Files in the "public" directory will be served by the node server.
-Lets get started with a simple Angular application with the following view "index.html" that we will create inside of the "public" directory.
+This will start a web server on port 4200. Make sure you can see the default view for an express app.
+
+Lets get started with a simple Angular application with the following view "index.html" that we will create inside of the "public" directory.  The application has a form that allows you to submit a comment and then lists the comments by upvotes.  You have seen this before, so lets start here.
 ```
 <html>
+
 <head>
-  <title>Comments</title>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
-  <script src="javascripts/app.js"></script>
+    <title>Comments</title>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
+    <script src="javascripts/comment.js"></script>
+
 </head>
+
 <body ng-app="comment" ng-controller="MainCtrl">
-  <div>
-    {{test}}
-  </div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="page-header">
+                <h1>Comments </h1>
+            </div>
+
+            <form ng-submit="addComment()" style="margin-top30px;">
+                <input type="text" ng-model="formContent"></input>
+                <button type="submit">Add Comment</button>
+            </form>
+            <div ng-repeat="comment in comments | orderBy: '-upvotes'">
+                <span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(comment)"></span> {{comment.title}} - upvotes: {{comment.upvotes}}
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
 ```
-Now create the controller in "public/javascripts/app.js".
+Now create the controller in "public/javascripts/comment.js" and add the comments array of objects and add the "addComment()" function and the "incrementUpvotes(comment)" function.  Notice that the incrementUpvotes function is passed the comment object so we dont need to find it.
 ```
 angular.module('comment', [])
-.controller('MainCtrl', [
-  '$scope',
-  function($scope){
-    $scope.test = 'Hello world!';
-  }
-]);
+    .controller('MainCtrl', [
+        '$scope',
+        function($scope) {
+            $scope.comments = [];
+            $scope.addComment = function() {
+                var newcomment = { title: $scope.formContent, upvotes: 0 };
+                $scope.formContent = '';
+                $scope.comments.push(newcomment);
+            };
+            $scope.incrementUpvotes = function(comment) {
+                comment.upvotes += 1;
+            };
+        }
+    ]);
 ```
-You now have your hello world Angular app.
-Now we are going to modify the controller to include some new model data with comments.
-```
-    $scope.comments = [
-      'Comment 1',
-      'Comment 2',
-      'Comment 3',
-      'Comment 4',
-      'Comment 5'
-    ];
-```
-And add some Angular code to display the comments.
-```
-<div ng-repeat="comment in comments">
-{{comment}}
-</div>
-```
-Now lets add upvotes to our comments and make each array element an object.
-```
-    $scope.comments = [
-      {title:'Comment 1', upvotes:5},
-      {title:'Comment 2', upvotes:6},
-      {title:'Comment 3', upvotes:1},
-      {title:'Comment 4', upvotes:4},
-      {title:'Comment 5', upvotes:3}
-    ];
-```
-And change the view to show upvotes.
-```
-<div ng-repeat="comment in comments">
-{{comment.title}} - upvotes: {{comment.upvotes}}
-</div>
-```
-Of course, you want to sort the comments based on popularity, so include a filter.
-```
-<div ng-repeat="comment in comments | orderBy: '-upvotes'">
-{{comment.title}} - upvotes: {{comment.upvotes}}
-</div>
-```
-Now that we have the list displayed, it would be nice to add comments to the list. First create a controller function that will add an object to the comments array.
-```
-    $scope.addComment = function() {
-      $scope.comments.push({title:'A new comment',upvotes:0});
-    };
-```
-Then add a button to call the function in your html file.
-```
-<button ng-click="addComment()">Add Comment</button>
-```
-Make sure everything is working. You should see the new comment in your list.
-Now we want to allow the user to enter custom comment data. So create a form.
-```
-  <form ng-submit="addComment()">
-    <input type="text" ng-model="formContent"></input>
-    <button type="submit">Add Comment</button>
-  </form>
-```
-And modify the controller to get the data from the model. The controller will also clear the form.
-```
-    $scope.addComment = function() {
-      $scope.comments.push({title:$scope.formContent,upvotes:0});
-      $scope.formContent='';
-    };
-```
-Now that we have the ability to add comments, we ought to allow the user to upvote the comments he likes. Next to each comment, we will place a click-able character that the user can select to increment the upvotes. Notice that the parameter to incrementUpvotes is passed by reference so the list is automatically rearranged.
-First, modify the html to have the clickable character
 
-```
-  <div ng-repeat="comment in comments | orderBy: '-upvotes'">
-    <span ng-click="incrementUpvotes(comment)">^</span>
-    {{comment.title}} - upvotes: {{comment.upvotes}}
-  </div>
-```
-Then add the function to the controller app.js
-```
-    $scope.incrementUpvotes = function(comment) {
-      comment.upvotes += 1;
-    };
-```
-The click in the view called the controller which changed the model which then updated the order in the view.
-Now lets make things look a little better. Use the bootstrap css to spruce things up.
-```
-<html>
-<head>
-  <title>Comments</title>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min.js"></script>
-  <script src="javascripts/app.js"></script>
-
-</head>
-<body ng-app="comment" ng-controller="MainCtrl">
-<div class="row">
-<div class="col-md-6 col-md-offset-3">
-<div class="page-header"> 
-  <h1>Comments </h1>
-</div>
-
-  <form ng-submit="addComment()" style = "margin-top30px;">
-    <input type="text" ng-model="formContent"></input>
-    <button type="submit">Add Comment</button>
-  </form>
-  <div>
-    {{test}}
-  </div>
-  <div ng-repeat="comment in comments | orderBy: '-upvotes'">
-    <span class="glyphicon glyphicon-thumbs-up" ng-click="incrementUpvotes(comment)"></span>
-    {{comment.title}} - upvotes: {{comment.upvotes}}
-  </div>
-</div>
-</div>
-</body>
-</html>
-```
 Test the front end to make sure everything is working so we can attach the back end.
-If you are stuck, you might want to refer to my working front end index.html and app.js
 
 Now we will install Mongoose which will provide schemas on top of mongodb.
 ```
 npm install --save mongoose
 ```
 The --save flag updates the packages.json file with mongoose so you can easily restore them with a "npm install" command.
-You may get an error saying something like
 
-lib/kerberos.h:5:27: fatal error: gssapi/gssapi.h: No such file or directory
-This is a good time to figure out how to install packages. If you google for this error, you will find that the kerberos library is not installed. To fix this use:
-```
-sudo apt-get install libkrb5-dev
-```
-Then rebuild your npm modules
-```
-sudo npm rebuild
-```
-Lets look at the express project structure
-The node project created by express has the following directory structure:
-app.js - This file is the launching point for our app. We use it to import all other server files including modules, configure routes, open database connections, and just about anything else we can think of.
-bin/ - This directory is used to contain useful executable scripts. By default it contains one called www . A quick peak inside reveals that this script actually includes app.js and when invoked, starts our Node.js server.
-node_modules - This directory is home to all external modules used in the project. As mentioned earlier, these modules are usually installed using npm install . You will most likely not have to touch anything here.
-package.json - This file defines a JSON object that contains various properties of our project including things such as name and version number. It can also defined what versions of Node are required and what modules our project depends on. A list of possible options can be found in the npm documentation.
-public/ - As the name alludes to, anything in this folder will be made publicly available by the server. This is where we are going to store JavaScript, CSS, images, and templates we want the client to use.
-routes/ - This directory houses our Node controllers and is usually where most of the backend code will be stored.
-views/ - If we were not using Angular, we could generate interactive views here.
-In addition to the above files structure, we are going to add one more folder. Create a new folder called "models":
+We are going to add one more folder for the mongoose models. Create a new folder called "models":
 ```
 mkdir models
 ```
