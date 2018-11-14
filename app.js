@@ -5,9 +5,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/comments');
+mongoose.connect('mongodb://localhost/fullmeanstack', { useNewUrlParser: true });
 require('./models/Comments');
-
+var db = mongoose.connection; //Saves the connection as a variable to use
+db.on('error', console.error.bind(console, 'connection error:')); //Checks for connection errors
+db.once('open', function() { //Lets us know when we're connected
+    console.log('Connected');
+});
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
