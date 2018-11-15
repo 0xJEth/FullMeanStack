@@ -200,7 +200,7 @@ You should now be able to test your route using curl. First access the route to 
 curl -X PUT http://localhost:4200/comments/<COMMENT ID>/upvote
 ```
 Now use the URL to make sure that the upvote count was incremented.
-Now that our backend is working, we just need to wire it up to our angular frontend. First we will create a getAll() function to retrieve comments from our REST service in public/javascripts/app.js.
+Now that our backend is working, we just need to wire it up to our angular frontend. First we will create a getAll() function to retrieve comments from our REST service in "public/javascripts/comment.js".
 ```
   $scope.getAll = function() {
     return $http.get('/comments').success(function(data){
@@ -258,8 +258,8 @@ And add the delete() function to your controller. Notice that we call getAll() a
       $http.delete('/comments/' + comment._id )
         .success(function(data){
           console.log("delete worked");
+          $scope.getAll();
         });
-      $scope.getAll();
     };
 ```
 
